@@ -1,6 +1,5 @@
 class GraphqlController < ApplicationController
 
-
   def execute
     variables = prepare_variables(params[:variables])
     query = params[:query]
@@ -52,7 +51,6 @@ class GraphqlController < ApplicationController
       Rails.logger.debug "❌ Decode Error: #{e.message}"
       nil
     end
-
   end
 
   def prepare_variables(variables_param)

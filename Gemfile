@@ -58,3 +58,7 @@ end
 
 
 gem "jwt", "~> 3.1"
+
+gem "csv", "~> 3.3"
+
+gem "apollo_upload_server"

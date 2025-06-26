@@ -1,5 +1,7 @@
 class User < ApplicationRecord
   has_secure_password
+  
+  has_one_attached :file
 
   validates :name, presence: true
   validates :email, presence: true, uniqueness: true
@@ -10,10 +12,11 @@ class User < ApplicationRecord
 
   has_many :comments, dependent: :destroy
 
-  
-  enum :role, { customer: 0, agent: 1}
- 
 
+  has_many :tickets, foreign_key: :customer_id, dependent: :destroy
+  has_many :assigned_tickets, class_name: "Ticket", foreign_key: :agent_id
+
+  enum :role, { customer: 0, agent: 1 }
 
   def password_strength
     if password&.downcase&.include?("password")

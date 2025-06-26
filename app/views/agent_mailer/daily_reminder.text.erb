@@ -1,0 +1,12 @@
+Hello <%= @agent.email %>,
+
+You have <%= @tickets.count %> open tickets that need your attention:
+
+<% @tickets.each do |ticket| %>
+- [<%= ticket.id %>] <%= ticket.title %> (created at <%= ticket.created_at.strftime('%b %d') %>)
+<% end %>
+
+Please review them as soon as possible.
+
+Thanks,  
+Your Friendly Support System
