@@ -7,6 +7,8 @@ Rails.application.routes.draw do
     mount GraphiQL::Rails::Engine, at: "/graphiql", graphql_path: "/graphql"
   end
 
+  root "welcome#welcome"
+
   # GraphQL endpoint
   post "/graphql", to: "graphql#execute"
 
@@ -19,6 +21,6 @@ Rails.application.routes.draw do
   # REST endpoints for tickets (for completeness, though GraphQL is used)
   resources :tickets, only: [ :create, :index, :show ]
 
-  # ✅ Mount Active Storage routes (required for blob downloads)
+
   mount ActiveStorage::Engine => "/rails/active_storage"
 end
