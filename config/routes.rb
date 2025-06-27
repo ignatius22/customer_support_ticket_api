@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
   # Default URL options for URL helpers (used in download URLs)
-  Rails.application.routes.default_url_options[:host] = 'localhost:3000'
+  Rails.application.routes.default_url_options[:host] = "localhost:3000"
 
   # Enable GraphiQL interface in development
   if Rails.env.development?
@@ -17,7 +17,7 @@ Rails.application.routes.draw do
   get "/exports/:id", to: "exports#show", as: :download_export
 
   # REST endpoints for tickets (for completeness, though GraphQL is used)
-  resources :tickets, only: [:create, :index, :show]
+  resources :tickets, only: [ :create, :index, :show ]
 
   # ✅ Mount Active Storage routes (required for blob downloads)
   mount ActiveStorage::Engine => "/rails/active_storage"

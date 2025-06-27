@@ -1,5 +1,5 @@
 class AgentMailer < ApplicationMailer
-  default from: 'support@example.com' # update as needed
+  default from: "support@example.com" # update as needed
 
   def daily_reminder(agent, tickets)
     @agent = agent

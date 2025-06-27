@@ -4,18 +4,18 @@ module Mutations
     argument :content, String, required: true
 
     field :comment, Types::CommentType, null: true
-    field :errors, [String], null: false
+    field :errors, [ String ], null: false
 
     def resolve(ticket_id:, content:)
       authorize!(current_user.present?)
 
       ticket = Ticket.find_by(id: ticket_id)
-      return { comment: nil, errors: ["Ticket not found"] } unless ticket
+      return { comment: nil, errors: [ "Ticket not found" ] } unless ticket
 
       if current_user.customer? && !agent_has_commented?(ticket)
         return {
           comment: nil,
-          errors: ["Customer can only comment after agent has replied."]
+          errors: [ "Customer can only comment after agent has replied." ]
         }
       end
 

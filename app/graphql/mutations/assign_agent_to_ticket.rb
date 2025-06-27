@@ -5,17 +5,17 @@ module Mutations
     argument :agent_id, ID, required: false
 
     field :ticket, Types::TicketType, null: true
-    field :errors, [String], null: false
+    field :errors, [ String ], null: false
 
     def resolve(ticket_id:, agent_id: nil)
       user = context[:current_user]
-      return { ticket: nil, errors: ["Unauthorized"] } unless user&.role == "agent"
+      return { ticket: nil, errors: [ "Unauthorized" ] } unless user&.role == "agent"
 
       ticket = Ticket.find_by(id: ticket_id)
-      return { ticket: nil, errors: ["Ticket not found"] } unless ticket
+      return { ticket: nil, errors: [ "Ticket not found" ] } unless ticket
 
       agent = agent_id.present? ? User.find_by(id: agent_id, role: "agent") : user
-      return { ticket: nil, errors: ["Agent not found"] } unless agent
+      return { ticket: nil, errors: [ "Agent not found" ] } unless agent
 
       ticket.agent = agent
 

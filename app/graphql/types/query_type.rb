@@ -10,8 +10,8 @@ module Types
       context.schema.object_from_id(id, context)
     end
 
-    field :nodes, [Types::NodeType, null: true], null: true do
-      argument :ids, [ID], required: true
+    field :nodes, [ Types::NodeType, null: true ], null: true do
+      argument :ids, [ ID ], required: true
     end
 
     def nodes(ids:)
@@ -19,7 +19,7 @@ module Types
     end
 
     # 🔍 Generic tickets query (optional filters)
-    field :tickets, [Types::TicketType], null: false do
+    field :tickets, [ Types::TicketType ], null: false do
       argument :status, String, required: false
       argument :customer_id, ID, required: false
     end
@@ -31,7 +31,7 @@ module Types
       scope
     end
 
-    field :my_tickets, [Types::TicketType], null: false,
+    field :my_tickets, [ Types::TicketType ], null: false,
       description: "Tickets belonging to the currently authenticated customer"
 
     def my_tickets
@@ -42,7 +42,7 @@ module Types
     end
 
     # 🧑‍💼 All Tickets (agent only)
-    field :all_tickets, [Types::TicketType], null: false,
+    field :all_tickets, [ Types::TicketType ], null: false,
       description: "All tickets — agent-only access"
 
     def all_tickets
@@ -69,16 +69,16 @@ module Types
       end
     end
 
-    field :comments, [Types::CommentType], null: false do
+    field :comments, [ Types::CommentType ], null: false do
       argument :ticket_id, ID, required: true
     end
 
     def comments(ticket_id:)
       ticket = Ticket.find_by(id: ticket_id)
       raise GraphQL::ExecutionError, "Ticket not found" unless ticket
-    
+
       user = context[:current_user]
-    
+
       # Only allow if current_user owns the ticket or is agent
       if user&.role == "agent" || user&.id == ticket.customer_id
         ticket.comments.order(:created_at)

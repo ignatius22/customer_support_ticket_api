@@ -8,7 +8,7 @@ RSpec.describe 'myTickets query', type: :request do
     token = jwt_for(customer)
     post "/graphql",
          params: {
-           query: <<~GQL,
+           query: <<~GQL
              query {
                myTickets {
                  id

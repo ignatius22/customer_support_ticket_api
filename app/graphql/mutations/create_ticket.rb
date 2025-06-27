@@ -5,7 +5,7 @@ module Mutations
     argument :description, String, required: true
 
     field :ticket, Types::TicketType, null: true
-    field :errors, [String], null: false
+    field :errors, [ String ], null: false
 
     def resolve(title:, description:)
       user = require_customer!  # 🔐 Auth check via utility

@@ -9,7 +9,7 @@ module Types
     field :agent, Types::UserType, null: true
 
     # Add this field to expose attachment URLs
-    field :file_urls, [String], null: true
+    field :file_urls, [ String ], null: true
 
     def file_urls
       object.files.map do |file|

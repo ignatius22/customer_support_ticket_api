@@ -32,7 +32,7 @@ RSpec.describe "Tickets", type: :request do
       expect(response).to have_http_status(:created)
       expect(Ticket.last.title).to eq('Login issue')
     end
-  
+
     it 'does not allow agents to create tickets' do
       post '/tickets', params: valid_params.merge(ticket: { customer_id: agent.id })
       expect(response).to have_http_status(:forbidden)
@@ -74,10 +74,10 @@ RSpec.describe "Tickets", type: :request do
     let!(:ticket1) { create(:ticket, customer: customer) }
     let!(:ticket2) { create(:ticket, customer: customer) }
     let!(:ticket3) { create(:ticket, customer: other_customer) }
-  
+
     it "returns only the tickets for the specified customer" do
       get "/tickets", params: { customer_id: customer.id }
-  
+
       expect(response).to have_http_status(:ok)
       json = JSON.parse(response.body)
       expect(json.length).to eq(2)
@@ -89,13 +89,13 @@ RSpec.describe "Tickets", type: :request do
     let!(:agent) { create(:user) }
     let!(:customer1) { create(:user) }
     let!(:customer2) { create(:user) }
-  
+
     let!(:open_ticket) { create(:ticket, status: "open", agent: agent, customer: customer1) }
     let!(:closed_ticket) { create(:ticket, status: "closed", agent: agent, customer: customer2) }
-  
+
     it "returns only tickets with the specified status" do
       get "/tickets", params: { status: "closed" }
-  
+
       expect(response).to have_http_status(:ok)
       parsed = JSON.parse(response.body)
       expect(parsed.length).to eq(1)
@@ -106,24 +106,23 @@ RSpec.describe "Tickets", type: :request do
   describe "GET /tickets role-based access" do
     let(:customer) { create(:user, role: 'customer') }
     let(:agent) { create(:user, role: 'agent') }
-  
+
     let!(:customer_ticket) { create(:ticket, customer: customer) }
     let!(:other_ticket) { create(:ticket) }
-  
+
     it 'allows customers to see only their tickets' do
       get "/tickets", params: { customer_id: customer.id }
       parsed = JSON.parse(response.body)
-      
+
       expect(parsed.length).to eq(1)
       expect(parsed.first["id"]).to eq(customer_ticket.id)
     end
-  
+
     it 'allows agents to see all tickets' do
       get "/tickets", params: { agent_id: agent.id }
       parsed = JSON.parse(response.body)
-  
+
       expect(parsed.length).to eq(2)
     end
   end
-  
 end

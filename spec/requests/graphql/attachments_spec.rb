@@ -33,10 +33,10 @@ RSpec.describe "GraphQL Attachments", type: :request do
           query: mutation,
           variables: {
             ticketId: ticket.id,
-            files: [nil] # this index will be replaced by map
+            files: [ nil ] # this index will be replaced by map
           }
         }.to_json,
-        map: { "0" => ["variables.files.0"] }.to_json,
+        map: { "0" => [ "variables.files.0" ] }.to_json,
         "0" => file
       },
       headers: {

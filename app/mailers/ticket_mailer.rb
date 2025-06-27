@@ -1,5 +1,5 @@
 class TicketMailer < ApplicationMailer
-  default from: 'no-reply@supportapp.com'
+  default from: "no-reply@supportapp.com"
 
   def closed_tickets_csv(agent, csv_data)
     attachments["closed_tickets.csv"] = {

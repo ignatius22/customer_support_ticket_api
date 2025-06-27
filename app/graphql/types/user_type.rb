@@ -7,7 +7,7 @@ module Types
     field :email, String, null: false
     field :password_digest, String, null: false
     field :role, String, null: false
-    field :file_urls, [String], null: true
+    field :file_urls, [ String ], null: true
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
 

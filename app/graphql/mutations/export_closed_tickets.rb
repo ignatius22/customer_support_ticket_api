@@ -1,11 +1,11 @@
 # app/graphql/mutations/export_closed_tickets.rb
-require 'csv'
-require 'stringio'
+require "csv"
+require "stringio"
 
 module Mutations
   class ExportClosedTickets < BaseMutation
     field :export, Types::ExportedCsvType, null: true
-    field :errors, [String], null: false
+    field :errors, [ String ], null: false
     field :download_url, String, null: true
 
     def resolve
@@ -47,7 +47,7 @@ module Mutations
     rescue => e
       {
         export: nil,
-        errors: [e.message],
+        errors: [ e.message ],
         download_url: nil
       }
     end

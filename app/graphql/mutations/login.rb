@@ -4,7 +4,7 @@ module Mutations
     argument :password, String, required: true
 
     field :token, String, null: true
-    field :errors, [String], null: false
+    field :errors, [ String ], null: false
 
     def resolve(email:, password:)
       user = User.find_by(email:)
@@ -12,7 +12,7 @@ module Mutations
       if user&.authenticate(password)
         { token: generate_token(user), errors: [] }
       else
-        { token: nil, errors: ["Invalid credentials"] }
+        { token: nil, errors: [ "Invalid credentials" ] }
       end
     end
   end

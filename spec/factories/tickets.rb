@@ -6,7 +6,7 @@ FactoryBot.define do
     association :customer, factory: :user
 
     trait :with_agent do
-      association :agent, factory: [:user, :agent]
+      association :agent, factory: [ :user, :agent ]
     end
 
     trait :in_progress do

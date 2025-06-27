@@ -1,5 +1,4 @@
 class GraphqlController < ApplicationController
-
   def execute
     variables = prepare_variables(params[:variables])
     query = params[:query]
@@ -38,7 +37,7 @@ class GraphqlController < ApplicationController
         token,
         Rails.application.credentials.secret_key_base,
         true,
-        algorithm: 'HS256'
+        algorithm: "HS256"
       )
       user_id = decoded[0]["user_id"]
       user = User.find_by(id: user_id)
@@ -73,7 +72,7 @@ class GraphqlController < ApplicationController
     logger.error e.backtrace.join("\n")
 
     render json: {
-      errors: [{ message: e.message, backtrace: e.backtrace }],
+      errors: [ { message: e.message, backtrace: e.backtrace } ],
       data: {}
     }, status: 500
   end

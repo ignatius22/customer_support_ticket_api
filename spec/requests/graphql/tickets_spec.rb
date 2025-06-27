@@ -20,7 +20,7 @@ RSpec.describe "GraphQL Tickets", type: :request do
   end
   let(:customer) { User.create!(email: "customer@example.com", password: "securepass123", name: "Jane", role: "customer") }
   let(:agent)    { User.create!(email: "agent@example.com", password: "securepass456", name: "Bob", role: "agent") }
-  
+
 
   def auth_header_for(user)
     token = JWT.encode({ user_id: user.id, exp: 24.hours.from_now.to_i }, Rails.application.credentials.secret_key_base)
