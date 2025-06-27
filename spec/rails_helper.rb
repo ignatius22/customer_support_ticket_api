@@ -15,6 +15,10 @@ require 'rspec/rails'
 # Load support files
 Dir[Rails.root.join('spec', 'support', '**', '*.rb')].each { |f| require f }
 
+RSpec.configure do |config|
+  config.include JwtHelper
+end
+
 
 Shoulda::Matchers.configure do |config|
   config.integrate do |with|
