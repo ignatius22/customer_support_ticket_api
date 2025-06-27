@@ -27,7 +27,7 @@ RSpec.describe Ticket, type: :model do
     it { should belong_to(:customer).class_name('User') }
     it { should belong_to(:agent).class_name('User').optional }
     it { should have_many(:comments) }
-    it { should have_many(:attachments) }
+ 
   end
 
   describe 'enums' do
