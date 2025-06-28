@@ -20,6 +20,7 @@ RSpec.describe 'myTickets query', type: :request do
          headers: { "Authorization" => "Bearer #{token}" }
 
     json = JSON.parse(response.body)
+    puts JSON.pretty_generate(json)
     expect(json.dig("data", "myTickets").length).to eq(2)
   end
 end

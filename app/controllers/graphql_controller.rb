@@ -35,7 +35,7 @@ class GraphqlController < ApplicationController
     begin
       decoded = JWT.decode(
         token,
-        decoded = JWT.decode(token, ENV.fetch("SECRET_KEY_BASE"), true, algorithm: "HS256"),
+        Rails.application.credentials.secret_key_base,
         true,
         algorithm: "HS256"
       )
