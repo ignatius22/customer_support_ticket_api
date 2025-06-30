@@ -13,7 +13,14 @@ module Types
 
     def file_urls
       object.files.map do |file|
-        Rails.application.routes.url_helpers.rails_blob_url(file, only_path: true)
+        # IMPORTANT: Remove `only_path: true`
+        # And explicitly provide host, port, and protocol to ensure absolute URLs
+        Rails.application.routes.url_helpers.rails_blob_url(
+          file,
+          host: Rails.application.routes.default_url_options[:host],
+          port: Rails.application.routes.default_url_options[:port],
+          protocol: Rails.application.routes.default_url_options[:protocol] || "http" # Use 'https' in production
+        )
       end
     end
   end

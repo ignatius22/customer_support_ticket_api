@@ -70,3 +70,6 @@ gem "csv", "~> 3.3"
 gem "apollo_upload_server"
 
 gem "kaminari"
+
+gem "cloudinary"
+gem "activestorage-cloudinary-service"

@@ -1,4 +1,3 @@
-# app/graphql/types/exported_csv_type.rb
 module Types
   class ExportedCsvType < Types::BaseObject
     field :id, ID, null: false
@@ -9,7 +8,7 @@ module Types
 
       Rails.application.routes.url_helpers.rails_blob_url(
         object.file,
-        host: ENV.fetch("APP_HOST", "http://localhost:3000")
+        host: ENV.fetch("APP_HOST", "https://customersupportticketapi-production.up.railway.app")
       )
     end
   end
