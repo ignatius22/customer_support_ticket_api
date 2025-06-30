@@ -73,3 +73,5 @@ gem "kaminari"
 
 gem "cloudinary"
 gem "activestorage-cloudinary-service"
+
+gem "letter_opener_web", "~> 3.0"
