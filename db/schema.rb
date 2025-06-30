@@ -67,6 +67,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_26_122013) do
     t.index ["user_id"], name: "index_exported_csvs_on_user_id"
   end
 
+  create_table "reminder_settings", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.boolean "enabled", default: true, null: false
+    t.string "preferred_time", default: "09:00", null: false
+    t.boolean "include_urgent", default: true, null: false
+    t.boolean "include_stale", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "enabled"], name: "index_reminder_settings_on_user_id_and_enabled"
+    t.index ["user_id"], name: "index_reminder_settings_on_user_id"
+  end
+
   create_table "tickets", force: :cascade do |t|
     t.string "title", null: false
     t.text "description", null: false
@@ -75,8 +87,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_26_122013) do
     t.bigint "agent_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "urgency", default: 0
     t.index ["agent_id"], name: "index_tickets_on_agent_id"
     t.index ["customer_id"], name: "index_tickets_on_customer_id"
+    t.index ["urgency"], name: "index_tickets_on_urgency"
   end
 
   create_table "users", force: :cascade do |t|
@@ -95,6 +109,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_26_122013) do
   add_foreign_key "comments", "tickets"
   add_foreign_key "comments", "users"
   add_foreign_key "exported_csvs", "users"
+  add_foreign_key "reminder_settings", "users"
   add_foreign_key "tickets", "users", column: "agent_id"
   add_foreign_key "tickets", "users", column: "customer_id"
 end

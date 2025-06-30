@@ -3,6 +3,7 @@ class User < ApplicationRecord
 
   has_one_attached :file
 
+
   validates :name, presence: true
   validates :email, presence: true, uniqueness: true
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }
@@ -22,5 +23,8 @@ class User < ApplicationRecord
     if password&.downcase&.include?("password")
       errors.add(:password, "is too weak")
     end
+  end
+  def generate_token
+    JWT.encode({ user_id: id }, Rails.application.credentials.secret_key_base)
   end
 end

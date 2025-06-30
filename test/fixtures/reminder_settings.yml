@@ -1,0 +1,13 @@
+agent_settings:
+  user: agent
+  enabled: true
+  preferred_time: "09:00"
+  include_urgent: true
+  include_stale: true
+
+disabled_settings:
+  user: agent2
+  enabled: false
+  preferred_time: "14:00"
+  include_urgent: false
+  include_stale: false

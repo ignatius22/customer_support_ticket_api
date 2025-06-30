@@ -1,6 +1,7 @@
 class GraphqlController < ApplicationController
+  skip_before_action :authenticate_user!, only: [ :execute ]
   def execute
-    variables = prepare_variables(params[:variables])
+    variables = ensure_hash(params[:variables])
     query = params[:query]
     operation_name = params[:operationName]
 
@@ -25,12 +26,10 @@ class GraphqlController < ApplicationController
 
   def current_user
     auth_header = request.headers["Authorization"]
-    Rails.logger.debug "🔐 Header: #{auth_header.inspect}"
 
     return nil unless auth_header&.start_with?("Bearer ")
 
     token = auth_header.split(" ").last
-    Rails.logger.debug "🧾 Token: #{token}"
 
     begin
       decoded = JWT.decode(
@@ -52,18 +51,18 @@ class GraphqlController < ApplicationController
     end
   end
 
-  def prepare_variables(variables_param)
-    case variables_param
+  def ensure_hash(ambiguous_param)
+    case ambiguous_param
     when String
-      variables_param.present? ? JSON.parse(variables_param) : {}
+      ambiguous_param.present? ? JSON.parse(ambiguous_param) : {}
     when Hash
-      variables_param
+      ambiguous_param
     when ActionController::Parameters
-      variables_param.to_unsafe_hash
+      ambiguous_param.to_unsafe_h
     when nil
       {}
     else
-      raise ArgumentError, "Unexpected parameter: #{variables_param}"
+      raise ArgumentError, "Unexpected parameter: #{ambiguous_param}"
     end
   end
 

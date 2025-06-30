@@ -44,7 +44,6 @@ RSpec.describe "GraphQL Attachments", type: :request do
       }
 
     json = JSON.parse(response.body)
-    puts JSON.pretty_generate(json) if json["data"].nil?
 
     data = json.dig("data", "addAttachment")
 

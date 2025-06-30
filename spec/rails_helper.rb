@@ -15,6 +15,9 @@ require 'rspec/rails'
 # Load support files
 Dir[Rails.root.join('spec', 'support', '**', '*.rb')].each { |f| require f }
 
+# Set up secret key for JWT
+Rails.application.credentials.secret_key_base = '12345678901234567890123456789012'
+
 RSpec.configure do |config|
   config.include JwtHelper
 end

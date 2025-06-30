@@ -9,18 +9,26 @@ RSpec.describe 'myTickets query', type: :request do
     post "/graphql",
          params: {
            query: <<~GQL
-             query {
-               myTickets {
-                 id
-                 title
-               }
-             }
+              query($first: Int) {
+                myTickets(first: $first) {
+                  edges {
+                    node {
+                      id
+                      title
+                    }
+                  }
+                  pageInfo {
+                    hasNextPage
+                    endCursor
+                  }
+                }
+              }
            GQL
          },
          headers: { "Authorization" => "Bearer #{token}" }
 
     json = JSON.parse(response.body)
     puts JSON.pretty_generate(json)
-    expect(json.dig("data", "myTickets").length).to eq(2)
+    expect(json.dig("data", "myTickets", "edges").length).to eq(2)
   end
 end

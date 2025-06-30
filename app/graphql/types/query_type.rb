@@ -1,7 +1,8 @@
-# app/graphql/types/query_type.rb
 module Types
   class QueryType < Types::BaseObject
-    # 🧠 Relay-style node fetchers (keep if using global IDs)
+    include GraphQL::Types::Relay::HasNodeField
+    include GraphQL::Types::Relay::HasNodesField
+    # Relay-style node fetchers (keep if using global IDs)
     field :node, Types::NodeType, null: true do
       argument :id, ID, required: true
     end
@@ -18,8 +19,16 @@ module Types
       ids.map { |id| context.schema.object_from_id(id, context) }
     end
 
-    # 🔍 Generic tickets query (optional filters)
-    field :tickets, [ Types::TicketType ], null: false do
+    # Get current user
+    field :me, Types::UserType, null: true,
+      description: "Get the currently authenticated user"
+
+    def me
+      context[:current_user]
+    end
+
+    # Generic tickets query (optional filters)
+    field :tickets, Types::TicketType.connection_type, null: false, connection: true do
       argument :status, String, required: false
       argument :customer_id, ID, required: false
     end
@@ -31,8 +40,9 @@ module Types
       scope
     end
 
-    field :my_tickets, [ Types::TicketType ], null: false,
-      description: "Tickets belonging to the currently authenticated customer"
+    field :my_tickets, Types::TicketType.connection_type, null: false,
+      description: "Tickets belonging to the currently authenticated customer",
+      connection: true
 
     def my_tickets
       user = context[:current_user]
@@ -41,9 +51,10 @@ module Types
       Ticket.where(customer_id: user.id)
     end
 
-    # 🧑‍💼 All Tickets (agent only)
-    field :all_tickets, [ Types::TicketType ], null: false,
-      description: "All tickets — agent-only access"
+    #  All Tickets (agent only)
+    field :all_tickets, Types::TicketType.connection_type, null: false,
+      description: "All tickets — agent-only access",
+      connection: true
 
     def all_tickets
       user = context[:current_user]
@@ -52,7 +63,7 @@ module Types
       Ticket.all
     end
 
-    # 🔍 Get one ticket by ID
+    # Get one ticket by ID
     field :ticket, Types::TicketType, null: true do
       argument :id, ID, required: true
     end

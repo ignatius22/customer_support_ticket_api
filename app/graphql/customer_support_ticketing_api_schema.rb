@@ -1,11 +1,27 @@
-# frozen_string_literal: true
-
 class CustomerSupportTicketingApiSchema < GraphQL::Schema
-  mutation(Types::MutationType)
-  query(Types::QueryType)
+  # Configure GraphQL schema
+  query Types::QueryType
+  mutation Types::MutationType
+
+  # Configure dataloader and limits
+  use GraphQL::Dataloader
+  max_complexity 300
+  max_depth 20
+
+  # Configure pagination
+  default_max_page_size 50
+  default_page_size 10
+
+  # Configure connections
+  def self.connection_class
+    GraphQL::Types::Relay::BaseConnection
+  end
+
+  def self.edge_class
+    GraphQL::Types::Relay::BaseEdge
+  end
 
   # For batch-loading (see https://graphql-ruby.org/dataloader/overview.html)
-  use GraphQL::Dataloader
 
   # GraphQL-Ruby calls this when something goes wrong while running a query:
   def self.type_error(err, context)

@@ -2,10 +2,14 @@
 require 'rails_helper'
 
 RSpec.describe "Tickets", type: :request do
+  def auth_headers(user)
+    token = JWT.encode({ user_id: user.id }, Rails.application.credentials.secret_key_base)
+    { "Authorization" => "Bearer #{token}" }
+  end
+
   describe "POST /tickets" do
     let(:customer) { create(:user) }
     let(:agent) { create(:user, role: 'agent') }
-
 
     let(:valid_params) do
       {
@@ -19,7 +23,7 @@ RSpec.describe "Tickets", type: :request do
 
     it "creates a new ticket" do
       expect {
-        post "/tickets", params: valid_params
+        post "/tickets", params: valid_params, headers: auth_headers(customer)
       }.to change(Ticket, :count).by(1)
 
       expect(response).to have_http_status(:created)
@@ -28,13 +32,13 @@ RSpec.describe "Tickets", type: :request do
     end
 
     it 'allows customers to create tickets' do
-      post '/tickets', params: valid_params
+      post '/tickets', params: valid_params, headers: auth_headers(customer)
       expect(response).to have_http_status(:created)
       expect(Ticket.last.title).to eq('Login issue')
     end
 
     it 'does not allow agents to create tickets' do
-      post '/tickets', params: valid_params.merge(ticket: { customer_id: agent.id })
+      post '/tickets', params: valid_params.merge(ticket: { customer_id: agent.id }), headers: auth_headers(agent)
       expect(response).to have_http_status(:forbidden)
       expect(Ticket.count).to eq(0)
     end
@@ -42,15 +46,54 @@ RSpec.describe "Tickets", type: :request do
 
   describe "GET /tickets" do
     let!(:customer) { create(:user) }
-    let!(:tickets) { create_list(:ticket, 3, customer: customer) }
+    let!(:tickets) { create_list(:ticket, 15, customer: customer) }
 
-    it "returns all tickets" do
-      get "/tickets"
+    it "returns paginated tickets" do
+      get "/tickets", params: { page: 1, per_page: 5 }, headers: auth_headers(customer)
 
       expect(response).to have_http_status(:ok)
       json = JSON.parse(response.body)
-      expect(json.length).to eq(3)
-      expect(json.first).to have_key("title")
+    expect(json.dig("tickets").length).to eq(5)
+      expect(json["meta"]).to include(
+        "current_page" => 1,
+        "total_pages" => 3,
+        "total_count" => 15
+      )
+      expect(json["meta"]["next_page"]).to eq(2)
+      expect(json["meta"]["prev_page"]).to be_nil
+
+      # Get second page
+      get "/tickets", params: { page: 2, per_page: 5 }, headers: auth_headers(customer)
+      json = JSON.parse(response.body)
+    expect(json["tickets"].length).to eq(5)
+      expect(json["meta"]).to include(
+        "current_page" => 2,
+        "next_page" => 3,
+        "prev_page" => 1
+      )
+
+      # Get last page
+      get "/tickets", params: { page: 3, per_page: 5 }, headers: auth_headers(customer)
+      json = JSON.parse(response.body)
+      expect(json["tickets"].length).to eq(5)
+      expect(json["meta"]).to include(
+        "current_page" => 3,
+        "next_page" => nil,
+        "prev_page" => 2
+      )
+    end
+
+    it "uses default pagination when no parameters are provided" do
+      get "/tickets", headers: auth_headers(customer)
+
+      expect(response).to have_http_status(:ok)
+      json = JSON.parse(response.body)
+      expect(json["tickets"].length).to eq(10) # Default per_page
+      expect(json["meta"]).to include(
+        "current_page" => 1,
+        "total_pages" => 2,
+        "total_count" => 15
+      )
     end
   end
 
@@ -59,7 +102,7 @@ RSpec.describe "Tickets", type: :request do
     let!(:ticket) { create(:ticket, customer: customer) }
 
     it "returns ticket by ID" do
-      get "/tickets/#{ticket.id}"
+      get "/tickets/#{ticket.id}", headers: auth_headers(customer)
 
       expect(response).to have_http_status(:ok)
       json = JSON.parse(response.body)
@@ -76,30 +119,39 @@ RSpec.describe "Tickets", type: :request do
     let!(:ticket3) { create(:ticket, customer: other_customer) }
 
     it "returns only the tickets for the specified customer" do
-      get "/tickets", params: { customer_id: customer.id }
+      get "/tickets", params: { customer_id: customer.id }, headers: auth_headers(customer)
 
       expect(response).to have_http_status(:ok)
       json = JSON.parse(response.body)
-      expect(json.length).to eq(2)
-      expect(json.map { |t| t["id"] }).to contain_exactly(ticket1.id, ticket2.id)
+      tickets = json["tickets"]
+      expect(tickets.length).to eq(2)
+      expect(tickets.map { |t| t["id"] }).to contain_exactly(ticket1.id, ticket2.id)
     end
   end
 
   describe "GET /tickets?status=closed" do
-    let!(:agent) { create(:user) }
-    let!(:customer1) { create(:user) }
-    let!(:customer2) { create(:user) }
+    let(:agent) { create(:user, role: 'agent') }
+    let(:customer1) { create(:user, role: 'customer') }
+    let(:customer2) { create(:user, role: 'customer') }
 
-    let!(:open_ticket) { create(:ticket, status: "open", agent: agent, customer: customer1) }
-    let!(:closed_ticket) { create(:ticket, status: "closed", agent: agent, customer: customer2) }
+    before do
+      @open_ticket = create(:ticket, status: :open, agent: agent, customer: customer1)
+      @closed_ticket = create(:ticket, title: 'Closed Ticket', status: :closed, agent: agent, customer: customer2)
+      @open_ticket_other = create(:ticket, status: :open, agent: agent, customer: customer1)
+
+      # Verify the tickets were created with correct statuses
+      expect(Ticket.where(status: :closed).count).to eq(1)
+      expect(Ticket.where(status: :open).count).to eq(2)
+    end
 
     it "returns only tickets with the specified status" do
-      get "/tickets", params: { status: "closed" }
+      get "/tickets", params: { status: "closed" }, headers: auth_headers(agent)
 
       expect(response).to have_http_status(:ok)
       parsed = JSON.parse(response.body)
-      expect(parsed.length).to eq(1)
-      expect(parsed.first["status"]).to eq("closed")
+      tickets = parsed["tickets"]
+      expect(tickets.length).to eq(1)
+      expect(tickets.first["status"]).to eq("closed")
     end
   end
 
@@ -111,18 +163,20 @@ RSpec.describe "Tickets", type: :request do
     let!(:other_ticket) { create(:ticket) }
 
     it 'allows customers to see only their tickets' do
-      get "/tickets", params: { customer_id: customer.id }
+      get "/tickets", params: { customer_id: customer.id }, headers: auth_headers(customer)
       parsed = JSON.parse(response.body)
+      tickets = parsed["tickets"]
 
-      expect(parsed.length).to eq(1)
-      expect(parsed.first["id"]).to eq(customer_ticket.id)
+      expect(tickets.length).to eq(1)
+      expect(tickets.first["id"]).to eq(customer_ticket.id)
     end
 
     it 'allows agents to see all tickets' do
-      get "/tickets", params: { agent_id: agent.id }
+      get "/tickets", params: { agent_id: agent.id }, headers: auth_headers(agent)
       parsed = JSON.parse(response.body)
+      tickets = parsed["tickets"]
 
-      expect(parsed.length).to eq(2)
+      expect(tickets.length).to eq(2)
     end
   end
 end
