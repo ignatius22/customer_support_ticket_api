@@ -31,7 +31,7 @@ Rails.application.configure do
   config.active_support.report_deprecations = false
 
   # Caching
-  config.cache_store = :solid_cache_store
+  # config.cache_store = :solid_cache_store
 
   # Background Jobs — now using Sidekiq
   config.active_job.queue_adapter = :sidekiq
