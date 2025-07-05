@@ -31,13 +31,18 @@ module Types
     field :all_tickets, Types::PaginatedTicketsType, null: false do
       argument :page, Integer, required: false, default_value: 1
       argument :per_page, Integer, required: false, default_value: 10
+      argument :status, String, required: false                # <-- ADD THIS
     end
 
-    def all_tickets(page:, per_page:)
+
+
+    def all_tickets(page:, per_page:, status: nil)
       user = context[:current_user]
       raise GraphQL::ExecutionError, "Unauthorized" unless user&.agent?
 
-      tickets = Ticket.order(created_at: :desc).page(page).per(per_page)
+      scope = Ticket.order(created_at: :desc)
+      scope = scope.where(status: status) if status.present?
+      tickets = scope.page(page).per(per_page)
 
       {
         tickets: tickets,
