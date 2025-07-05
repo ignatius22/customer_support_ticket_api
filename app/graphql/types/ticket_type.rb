@@ -4,7 +4,7 @@ module Types
     field :title, String, null: false
     field :description, String, null: false
     field :status, String, null: false
-    field :urgency, String, null: true
+
 
     field :customer, Types::UserType, null: false
     field :agent, Types::UserType, null: true
