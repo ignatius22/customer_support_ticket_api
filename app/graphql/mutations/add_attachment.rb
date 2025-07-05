@@ -21,10 +21,7 @@ module Mutations
         )
       end
 
-      {
-        ticket: ticket,
-        errors: []
-      }
+      { ticket: ticket, errors: [] }
     rescue => e
       { ticket: nil, errors: [ e.message ] }
     end

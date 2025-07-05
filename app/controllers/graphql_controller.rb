@@ -1,13 +1,18 @@
+# app/controllers/graphql_controller.rb
+require "jwt"
+
 class GraphqlController < ApplicationController
-  skip_before_action :authenticate_user!, only: [ :execute ]
+  skip_before_action :authenticate_user!, raise: false # <- This is crucial
+
+
   def execute
-    variables = ensure_hash(params[:variables])
+    variables = prepare_variables(params[:variables])
     query = params[:query]
     operation_name = params[:operationName]
 
-    context = {
-      current_user: current_user
-    }
+    context = {}
+    user = current_user
+    context[:current_user] = user if user.present?
 
     result = CustomerSupportTicketingApiSchema.execute(
       query,
@@ -26,10 +31,12 @@ class GraphqlController < ApplicationController
 
   def current_user
     auth_header = request.headers["Authorization"]
+    Rails.logger.debug "🔐 Header: #{auth_header.inspect}"
 
     return nil unless auth_header&.start_with?("Bearer ")
 
     token = auth_header.split(" ").last
+    Rails.logger.debug "🧾 Token: #{token}"
 
     begin
       decoded = JWT.decode(
@@ -43,26 +50,26 @@ class GraphqlController < ApplicationController
       Rails.logger.debug "👤 Current User: #{user&.email}"
       user
     rescue JWT::ExpiredSignature
-      Rails.logger.debug "❌ Token has expired"
+      Rails.logger.warn "❌ Token has expired"
       nil
     rescue JWT::DecodeError => e
-      Rails.logger.debug "❌ Decode Error: #{e.message}"
+      Rails.logger.warn "❌ JWT Decode Error: #{e.message}"
       nil
     end
   end
 
-  def ensure_hash(ambiguous_param)
-    case ambiguous_param
+  def prepare_variables(variables_param)
+    case variables_param
     when String
-      ambiguous_param.present? ? JSON.parse(ambiguous_param) : {}
+      variables_param.present? ? JSON.parse(variables_param) : {}
     when Hash
-      ambiguous_param
+      variables_param
     when ActionController::Parameters
-      ambiguous_param.to_unsafe_h
+      variables_param.to_unsafe_h
     when nil
       {}
     else
-      raise ArgumentError, "Unexpected parameter: #{ambiguous_param}"
+      raise ArgumentError, "Unexpected parameter: #{variables_param}"
     end
   end
 

@@ -57,9 +57,13 @@ RSpec.describe "GraphQL Tickets", type: :request do
       }
 
     json = JSON.parse(response.body)
-    errors = json["errors"]
-    expect(errors.first["message"]).to eq("Unauthorized")
+    puts JSON.pretty_generate(json) # Optional debug output
+
+    # Safer check
+    expect(json["errors"]).to be_present
+    expect(json["errors"].first["message"]).to eq("Unauthorized")
   end
+
 
   it "rejects agents from creating tickets" do
     post "/graphql",

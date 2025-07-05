@@ -17,10 +17,6 @@ class User < ApplicationRecord
 
   enum :role, { customer: 0, agent: 1 }
 
-  # --- NEW ADDITIONS FOR REMINDER SETTINGS ---
-  has_one :reminder_setting, dependent: :destroy
-  after_create :create_default_reminder_setting, if: :agent?
-  # --- END NEW ADDITIONS ---
 
   def password_strength
     if password&.downcase&.include?("password")
@@ -31,14 +27,4 @@ class User < ApplicationRecord
   def generate_token
     JWT.encode({ user_id: id }, Rails.application.credentials.secret_key_base)
   end
-
-  private
-
-  # --- NEW METHOD FOR REMINDER SETTINGS ---
-  def create_default_reminder_setting
-    # Only create if the user is an agent and doesn't already have one
-    # This ensures every new agent gets an enabled reminder setting by default
-    build_reminder_setting(enabled: true).save! unless reminder_setting.present?
-  end
-  # --- END NEW METHOD ---
 end

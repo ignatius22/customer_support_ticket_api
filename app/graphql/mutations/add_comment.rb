@@ -19,10 +19,14 @@ module Mutations
         }
       end
 
-      comment = Comment.new(content:, user: current_user, ticket:)
+      comment = Comment.new(
+        content: content,
+        user: current_user,
+        ticket: ticket
+      )
 
       if comment.save
-        { comment:, errors: [] }
+        { comment: comment, errors: [] }
       else
         { comment: nil, errors: comment.errors.full_messages }
       end

@@ -1,21 +1,23 @@
-# Customer Support Ticketing API
 
-This is a Rails + GraphQL-based backend API for a customer support ticketing system.
+# 📨 Customer Support Ticketing API
+
+A **Rails + GraphQL-based backend** for a customer support ticketing system with role-based access, ticket attachments, email notifications, and background job handling.
 
 ---
 
 ## 🚀 Tech Stack
 
-* **Ruby on Rails 8**
-* **PostgreSQL**
-* **GraphQL (graphql-ruby)**
-* **JWT Authentication**
-* **Active Storage (for attachments)**
-* **ActionMailer (for agent reminders)**
+- **Ruby on Rails 8**
+- **PostgreSQL**
+- **GraphQL** (`graphql-ruby`)
+- **JWT Authentication**
+- **Active Storage** (Cloudinary or local)
+- **Solid Queue** (background jobs)
+- **Action Mailer** (agent reminders)
 
 ---
 
-## 🛆 Setup Instructions
+## 🛠️ Setup Instructions
 
 ```bash
 git clone <your-repo>
@@ -23,23 +25,23 @@ cd customer_support_ticketing_api
 
 bundle install
 rails db:setup
-```
+````
 
-Add this to `.env` or your environment config:
+Create a `.env` file with:
 
 ```env
 APP_HOST=http://localhost:3000
 ```
 
-Then start the server:
+Then run:
 
 ```bash
-rails s
+rails server
 ```
 
 ---
 
-## 🧲 Seed Demo Users
+## 🧪 Seed Demo Users
 
 Run:
 
@@ -47,18 +49,26 @@ Run:
 rails db:seed
 ```
 
-Creates:
+This creates some test users with predefined roles and credentials.
 
-| Email                                       | Password    | Role     |
-| ------------------------------------------- | ----------- | -------- |
-| [john@example.com](mailto:john@example.com) | password123 | customer |
-| [jane@example.com](mailto:jane@example.com) | password123 | agent    |
+---
+
+## 👤 Test Users
+
+| Role     | Email                   | Password        |
+| -------- | ----------------------- | --------------- |
+| Customer | `john@example.com`      | `password123`   |
+| Agent    | `jane@example.com`      | `password123`   |
+| Agent    | `agent@example.com`     | `strongpass123` |
+| Customer | `customer1@example.com` | `strongpass123` |
+
+> Use these credentials to test the login and role-specific functionality.
 
 ---
 
 ## 🔐 Authentication
 
-Authenticate using the following GraphQL mutations:
+Authenticate via GraphQL mutations:
 
 ### Sign Up
 
@@ -89,11 +99,12 @@ mutation {
 }
 ```
 
-> Use `Authorization: Bearer <token>` in headers for authenticated queries.
+> Add the token to request headers as:
+> `Authorization: Bearer <token>`
 
 ---
 
-## 🗾️ Sample Queries
+## 🎟️ Ticket Operations
 
 ### Create Ticket
 
@@ -126,34 +137,9 @@ query {
 
 ---
 
-## 📄 CSV Export (Agent only)
+## 📎 File Upload (Attachments)
 
-```graphql
-mutation {
-  exportClosedTickets {
-    downloadUrl
-    errors
-  }
-}
-```
-
----
-
-## 📬 Daily Email Reminder
-
-Sends email to agents with open tickets.
-
-Trigger manually:
-
-```bash
-rails runner 'DailyReminderJob.perform_now'
-```
-
----
-
-## 📌 File Upload (Attachments)
-
-Upload files using a GraphQL client (e.g. Altair):
+Supports multiple file uploads via GraphQL:
 
 ```graphql
 mutation($ticketId: ID!, $files: [Upload!]!) {
@@ -171,36 +157,65 @@ mutation($ticketId: ID!, $files: [Upload!]!) {
 }
 ```
 
-Set `Content-Type: multipart/form-data` and provide file uploads in Altair.
+> Use `Content-Type: multipart/form-data` with a GraphQL client like **Altair**, **Postman**, or **Insomnia**.
 
 ---
 
-## ✅ Tests
+## 📄 CSV Export (Agent Only)
+
+Export closed tickets:
+
+```graphql
+mutation {
+  exportClosedTickets {
+    downloadUrl
+    errors
+  }
+}
+```
+
+---
+
+## 📬 Daily Email Reminder
+
+Sends a summary email to agents with pending tickets.
+
+Run manually:
+
+```bash
+rails runner 'DailyReminderJob.perform_now'
+```
+
+---
+
+## ✅ Test Suite
 
 ```bash
 bundle exec rspec
 ```
 
-Covers:
+Includes tests for:
 
-* Model validations
-* Auth
-* Ticket logic
+* Authentication
+* Ticket creation & updates
+* File upload logic
 * CSV export
-* GraphQL mutations/queries
+* GraphQL resolvers
 
 ---
 
-## 🌐 Deployment
+## 🚀 Deployment
 
-Deployable to platforms like:
+Compatible with:
 
+* [Railway](https://railway.app/)
 * [Render](https://render.com/)
 * [Fly.io](https://fly.io/)
-* [Railway](https://railway.app/)
+* Heroku (with minor tweaks)
 
 ---
 
-## 🧠 Author
+## 👤 Author
 
-Built by Ignatius Sani.
+Built and maintained by **Ignatius Sani**
+

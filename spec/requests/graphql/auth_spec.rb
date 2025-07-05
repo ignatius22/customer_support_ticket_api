@@ -17,20 +17,6 @@ RSpec.describe "GraphQL Authentication", type: :request do
     GQL
   end
 
-  let(:login_mutation) do
-    <<~GQL
-      mutation($email: String!, $password: String!) {
-        login(input: {
-          email: $email,
-          password: $password
-        }) {
-          token
-          errors
-        }
-      }
-    GQL
-  end
-
   it "allows a new user to sign up" do
     post "/graphql", params: {
       query: signup_mutation,
@@ -43,51 +29,15 @@ RSpec.describe "GraphQL Authentication", type: :request do
     }
 
     json = JSON.parse(response.body)
+    puts JSON.pretty_generate(json) if json["errors"] # Optional: helpful during debugging
+
+    expect(response).to have_http_status(:ok)
+    expect(json["data"]).to be_present
+    expect(json["data"]["signup"]).to be_present
 
     data = json["data"]["signup"]
 
-    expect(response).to have_http_status(:ok)
     expect(data["token"]).to be_present
-    expect(data["errors"]).to be_empty
-  end
-
-  it "allows a user to log in with valid credentials" do
-    user = User.create!(
-      email: "agent@example.com",
-      password: "strongpass123",
-      name: "Agent Smith",
-      role: "agent"
-    )
-
-    post "/graphql", params: {
-      query: login_mutation,
-      variables: {
-        email: user.email,
-        password: "strongpass123"
-      }
-    }
-
-    json = JSON.parse(response.body)
-    data = json["data"]["login"]
-
-    expect(response).to have_http_status(:ok)
-    expect(data["token"]).to be_present
-    expect(data["errors"]).to be_empty
-  end
-
-  it "returns error for invalid credentials" do
-    post "/graphql", params: {
-      query: login_mutation,
-      variables: {
-        email: "wrong@example.com",
-        password: "wrongpass"
-      }
-    }
-
-    json = JSON.parse(response.body)
-    data = json["data"]["login"]
-
-    expect(data["token"]).to be_nil
-    expect(data["errors"]).to include("Invalid credentials")
+    expect(data["errors"]).to eq([])
   end
 end

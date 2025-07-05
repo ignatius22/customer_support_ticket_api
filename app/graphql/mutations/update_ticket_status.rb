@@ -12,7 +12,7 @@ module Mutations
       ticket = Ticket.find_by(id: ticket_id)
       return { ticket: nil, errors: [ "Ticket not found" ] } unless ticket
 
-      unless Ticket.statuses.keys.include?(status)
+      unless Ticket.statuses.key?(status)
         return { ticket: nil, errors: [ "Invalid status: #{status}" ] }
       end
 
@@ -20,7 +20,7 @@ module Mutations
       ticket.agent ||= user
 
       if ticket.save
-        { ticket:, errors: [] }
+        { ticket: ticket, errors: [] }
       else
         { ticket: nil, errors: ticket.errors.full_messages }
       end

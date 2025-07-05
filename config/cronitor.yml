@@ -1,0 +1,5 @@
+# jobs:
+#   cleanup_user_accounts:
+#     type: cron
+#     schedule: "0 * * * *"  # Run every hour
+#     command: Cleanup::UserAccountsJob

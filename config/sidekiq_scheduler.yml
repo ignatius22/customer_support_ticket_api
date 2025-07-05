@@ -1,0 +1,5 @@
+# config/sidekiq_scheduler.yml
+daily_reminder_job:
+  cron: "0 7 * * *"   # Every day at 8 AM
+  class: "DailyReminderJob"
+  queue: default

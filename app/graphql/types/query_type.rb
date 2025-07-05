@@ -1,82 +1,68 @@
 module Types
   class QueryType < Types::BaseObject
-    include GraphQL::Types::Relay::HasNodeField
-    include GraphQL::Types::Relay::HasNodesField
-    # Relay-style node fetchers (keep if using global IDs)
-    field :node, Types::NodeType, null: true do
-      argument :id, ID, required: true
-    end
-
-    def node(id:)
-      context.schema.object_from_id(id, context)
-    end
-
-    field :nodes, [ Types::NodeType, null: true ], null: true do
-      argument :ids, [ ID ], required: true
-    end
-
-    def nodes(ids:)
-      ids.map { |id| context.schema.object_from_id(id, context) }
-    end
-
-    # Get current user
-    field :me, Types::UserType, null: true,
-      description: "Get the currently authenticated user"
+    #  Authenticated user
+    field :me, Types::UserType, null: true
 
     def me
       context[:current_user]
     end
 
-    # Generic tickets query (optional filters)
-    field :tickets, Types::TicketType.connection_type, null: false, connection: true do
-      argument :status, String, required: false
-      argument :customer_id, ID, required: false
+
+    field :my_tickets, Types::PaginatedTicketsType, null: false do
+      argument :page, Integer, required: false, default_value: 1
+      argument :per_page, Integer, required: false, default_value: 10
     end
 
-    def tickets(status: nil, customer_id: nil)
-      scope = Ticket.all
-      scope = scope.where(status: status) if status.present?
-      scope = scope.where(customer_id: customer_id) if customer_id.present?
-      scope
-    end
-
-    field :my_tickets, Types::TicketType.connection_type, null: false,
-      description: "Tickets belonging to the currently authenticated customer",
-      connection: true
-
-    def my_tickets
+    def my_tickets(page:, per_page:)
       user = context[:current_user]
-      raise GraphQL::ExecutionError, "Unauthorized" unless user&.role == "customer"
+      raise GraphQL::ExecutionError, "Unauthorized" unless user&.customer?
 
-      Ticket.where(customer_id: user.id)
+      tickets = user.tickets.order(created_at: :desc).page(page).per(per_page)
+
+      {
+        tickets: tickets,
+        current_page: tickets.current_page,
+        total_pages: tickets.total_pages,
+        total_count: tickets.total_count
+      }
     end
 
-    #  All Tickets (agent only)
-    field :all_tickets, Types::TicketType.connection_type, null: false,
-      description: "All tickets — agent-only access",
-      connection: true
 
-    def all_tickets
+    field :all_tickets, Types::PaginatedTicketsType, null: false do
+      argument :page, Integer, required: false, default_value: 1
+      argument :per_page, Integer, required: false, default_value: 10
+    end
+
+    def all_tickets(page:, per_page:)
       user = context[:current_user]
-      raise GraphQL::ExecutionError, "Unauthorized" unless user&.role == "agent"
+      raise GraphQL::ExecutionError, "Unauthorized" unless user&.agent?
 
-      Ticket.all
+      tickets = Ticket.order(created_at: :desc).page(page).per(per_page)
+
+      {
+        tickets: tickets,
+        current_page: tickets.current_page,
+        total_pages: tickets.total_pages,
+        total_count: tickets.total_count
+      }
     end
 
-    # Get one ticket by ID
+    # Fetch single ticket (restricted)
     field :ticket, Types::TicketType, null: true do
       argument :id, ID, required: true
     end
 
     def ticket(id:)
       user = context[:current_user]
+      raise GraphQL::ExecutionError, "Unauthorized" unless user
+
       ticket = Ticket.find_by(id: id)
       return nil unless ticket
 
-      if user&.role == "agent" || ticket.customer_id == user&.id
+      if user.agent? || ticket.customer_id == user.id
         ticket
       else
-        raise GraphQL::ExecutionError, "Unauthorized"
+        raise GraphQL::ExecutionError, "Access denied"
       end
     end
 
@@ -84,17 +70,19 @@ module Types
       argument :ticket_id, ID, required: true
     end
 
+
     def comments(ticket_id:)
+      user = context[:current_user]
+      raise GraphQL::ExecutionError, "Unauthorized" unless user
+
       ticket = Ticket.find_by(id: ticket_id)
       raise GraphQL::ExecutionError, "Ticket not found" unless ticket
 
-      user = context[:current_user]
-
-      # Only allow if current_user owns the ticket or is agent
-      if user&.role == "agent" || user&.id == ticket.customer_id
-        ticket.comments.order(:created_at)
+      # Optional: only allow customer/agent associated with ticket
+      if user.agent? || ticket.customer_id == user.id
+        ticket.comments.includes(:user)
       else
-        raise GraphQL::ExecutionError, "Unauthorized"
+        raise GraphQL::ExecutionError, "Access denied"
       end
     end
   end

@@ -1,4 +1,3 @@
-# app/graphql/mutations/create_ticket.rb
 module Mutations
   class CreateTicket < BaseMutation
     argument :title, String, required: true
@@ -8,9 +7,13 @@ module Mutations
     field :errors, [ String ], null: false
 
     def resolve(title:, description:)
-      user = require_customer!  # 🔐 Auth check via utility
+      user = require_customer!
 
-      ticket = Ticket.new(title:, description:, customer: user)
+      ticket = Ticket.new(
+        title: title,
+        description: description,
+        customer: user
+      )
 
       if ticket.save
         { ticket: ticket, errors: [] }

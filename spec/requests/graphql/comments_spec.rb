@@ -49,12 +49,16 @@ RSpec.describe "GraphQL Comments", type: :request do
 
     post "/graphql", params: {
       query: query_comments,
-      variables: { ticketId: ticket.id }
+      variables: { ticketId: ticket.id }.to_json
     }, headers: auth_headers(customer)
 
     json = JSON.parse(response.body)
-    data = json.dig("data", "comments")
+    puts JSON.pretty_generate(json)
 
+    expect(json["errors"]).to be_nil, -> { "GraphQL error: #{json['errors']&.map { |e| e['message'] }.join(', ')}" }
+
+    data = json.dig("data", "comments")
+    expect(data).to be_present, "Expected data['comments'] to be present"
     expect(data.length).to eq(2)
     expect(data.map { |c| c["content"] }).to include("Hello", "Thanks")
   end
@@ -62,25 +66,33 @@ RSpec.describe "GraphQL Comments", type: :request do
   it "allows agent to comment on a ticket" do
     post "/graphql", params: {
       query: add_comment_mutation,
-      variables: { ticketId: ticket.id, content: "Working on it." }
+      variables: { ticketId: ticket.id, content: "Working on it." }.to_json
     }, headers: auth_headers(agent)
 
     json = JSON.parse(response.body)
-    data = json.dig("data", "addComment")
+    puts JSON.pretty_generate(json)
 
+    expect(json["errors"]).to be_nil
+
+    data = json.dig("data", "addComment")
+    expect(data).to be_present
     expect(data["comment"]["content"]).to eq("Working on it.")
-    expect(data["errors"]).to be_empty
+    expect(data["errors"]).to eq([])
   end
 
   it "prevents customer from commenting before agent has commented" do
     post "/graphql", params: {
       query: add_comment_mutation,
-      variables: { ticketId: ticket.id, content: "Any update?" }
+      variables: { ticketId: ticket.id, content: "Any update?" }.to_json
     }, headers: auth_headers(customer)
 
     json = JSON.parse(response.body)
-    data = json.dig("data", "addComment")
+    puts JSON.pretty_generate(json)
 
+    expect(json["errors"]).to be_nil
+
+    data = json.dig("data", "addComment")
+    expect(data).to be_present
     expect(data["comment"]).to be_nil
     expect(data["errors"]).to include("Customer can only comment after agent has replied.")
   end
@@ -90,13 +102,17 @@ RSpec.describe "GraphQL Comments", type: :request do
 
     post "/graphql", params: {
       query: add_comment_mutation,
-      variables: { ticketId: ticket.id, content: "Thanks!" }
+      variables: { ticketId: ticket.id, content: "Thanks!" }.to_json
     }, headers: auth_headers(customer)
 
     json = JSON.parse(response.body)
-    data = json.dig("data", "addComment")
+    puts JSON.pretty_generate(json)
 
+    expect(json["errors"]).to be_nil
+
+    data = json.dig("data", "addComment")
+    expect(data).to be_present
     expect(data["comment"]["content"]).to eq("Thanks!")
-    expect(data["errors"]).to be_empty
+    expect(data["errors"]).to eq([])
   end
 end
