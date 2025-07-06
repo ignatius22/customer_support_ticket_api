@@ -23,6 +23,14 @@ Rails.application.configure do
   config.assume_ssl = true
   config.force_ssl = true
 
+  # Get the host from an environment variable for production URLs
+  # Make sure to set this environment variable in your production environment (e.g., Heroku, server config)
+  # Example: APP_HOST=your-production-domain.com
+  production_host = ENV.fetch("APP_HOST_PROD") {
+    raise "APP_HOST_PROD environment variable is not set for production!"
+  }
+  production_protocol = ENV.fetch("APP_PROTOCOL", "https") # Default to https
+
   # Logging
   config.log_tags  = [ :request_id ]
   config.logger    = ActiveSupport::TaggedLogging.logger(STDOUT)
@@ -39,7 +47,13 @@ Rails.application.configure do
   # Email delivery setup
   config.action_mailer.raise_delivery_errors = true
   config.action_mailer.delivery_method = :smtp
-  config.action_mailer.default_url_options = { host: "example.com", protocol: "https" }
+  config.action_mailer.default_url_options = { host: production_host, protocol: production_protocol }
+
+  # IMPORTANT: Set default URL options for Rails routes to ensure Active Storage
+  # can generate full URLs, especially when using a service like Cloudinary.
+  config.action_controller.default_url_options = { host: production_host, protocol: production_protocol }
+  Rails.application.routes.default_url_options = { host: production_host, protocol: production_protocol }
+
 
   config.action_mailer.smtp_settings = {
     user_name: Rails.application.credentials.dig(:smtp, :user_name),
