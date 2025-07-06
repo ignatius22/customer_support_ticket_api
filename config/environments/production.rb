@@ -23,18 +23,15 @@ Rails.application.configure do
   config.force_ssl = true
 
   # --- START: ENVIRONMENT VARIABLE CONFIGURATION FOR HOST & PROTOCOL ---
-  # These variables MUST be set in your Railway project's service environment variables.
-  # Example for APP_HOST_PROD: your-app-name.up.railway.app OR api.yourdomain.com
-  # Example for APP_PROTOCOL_PROD: https
   production_host = ENV.fetch("APP_HOST_PROD") do
     raise "APP_HOST_PROD environment variable is not set for production! Please configure it on Railway."
   end
-  production_protocol = ENV.fetch("APP_PROTOCOL_PROD", "https") # Defaults to https if not explicitly set
 
+  production_protocol = ENV.fetch("APP_PROTOCOL_PROD", "https")
   # --- END: ENVIRONMENT VARIABLE CONFIGURATION ---
 
   # Logging
-  config.log_tags  = [ :request_id ]
+  config.log_tags  = [:request_id]
   config.logger    = ActiveSupport::TaggedLogging.logger(STDOUT)
   config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
   config.silence_healthcheck_path = "/up"
@@ -54,18 +51,23 @@ Rails.application.configure do
   config.action_mailer.smtp_settings = {
     user_name: Rails.application.credentials.dig(:smtp, :user_name),
     password:  Rails.application.credentials.dig(:smtp, :password),
-    address:   "smtp.sendgrid.net", # or smtp.mailgun.org etc.
+    address:   "smtp.sendgrid.net",
     port:      587,
     authentication: :plain,
     enable_starttls_auto: true
   }
 
-  # --- START: CRITICAL URL OPTIONS FOR ACTIVE STORAGE AND ROUTES ---
-  # These lines are absolutely ESSENTIAL for Active Storage to generate
-  # correct, full URLs for your attachments (e.g., in TicketType#file_urls).
-  # They provide the necessary host and protocol context to the Rails URL helpers.
+  # --- START: CRITICAL URL OPTIONS FOR ROUTES + ACTIVE STORAGE ---
   config.action_controller.default_url_options = { host: production_host, protocol: production_protocol }
   Rails.application.routes.default_url_options = { host: production_host, protocol: production_protocol }
+
+  # This is CRITICAL for ActiveStorage::Current.url_options
+  config.after_initialize do
+    ActiveStorage::Current.url_options = {
+      host: production_host,
+      protocol: production_protocol
+    }
+  end
   # --- END: CRITICAL URL OPTIONS ---
 
   # I18n fallbacks
@@ -73,5 +75,5 @@ Rails.application.configure do
 
   # Schema dump
   config.active_record.dump_schema_after_migration = false
-  config.active_record.attributes_for_inspect = [ :id ]
+  config.active_record.attributes_for_inspect = [:id]
 end
