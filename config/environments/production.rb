@@ -16,6 +16,8 @@ Rails.application.configure do
     "Cache-Control" => "public, max-age=#{1.year.to_i}"
   }
 
+  Rails.application.routes.default_url_options[:host] = ENV["APP_HOST_PROD"]
+
   # Use Cloudinary for file storage.
   config.active_storage.service = :cloudinary
 

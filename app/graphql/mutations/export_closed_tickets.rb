@@ -1,4 +1,3 @@
-# app/graphql/mutations/export_closed_tickets.rb
 require "csv"
 require "stringio"
 
@@ -14,18 +13,7 @@ module Mutations
       tickets = Ticket.where(status: :closed)
                       .where("updated_at >= ?", 30.days.ago)
 
-      csv_content = CSV.generate(headers: true) do |csv|
-        csv << %w[id title customer status closed_at]
-        tickets.each do |ticket|
-          csv << [
-            ticket.id,
-            ticket.title,
-            ticket.customer&.email,
-            ticket.status,
-            ticket.updated_at.to_date
-          ]
-        end
-      end
+      csv_content = TicketExporter.new(tickets).to_csv
 
       export = ExportedCsv.create!(user: agent)
       export.file.attach(

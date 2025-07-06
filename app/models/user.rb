@@ -23,8 +23,4 @@ class User < ApplicationRecord
       errors.add(:password, "is too weak")
     end
   end
-
-  def generate_token
-    JWT.encode({ user_id: id }, Rails.application.credentials.secret_key_base)
-  end
 end

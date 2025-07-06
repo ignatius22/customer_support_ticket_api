@@ -1,7 +1,7 @@
 module Mutations
   class UpdateTicketStatus < BaseMutation
     argument :ticket_id, ID, required: true
-    argument :status, String, required: true
+    argument :status, Types::TicketStatusEnum, required: true
 
     field :ticket, Types::TicketType, null: true
     field :errors, [ String ], null: false

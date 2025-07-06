@@ -31,8 +31,9 @@ module Types
     field :all_tickets, Types::PaginatedTicketsType, null: false do
       argument :page, Integer, required: false, default_value: 1
       argument :per_page, Integer, required: false, default_value: 10
-      argument :status, String, required: false                # <-- ADD THIS
+      argument :status, Types::TicketStatusEnum, required: false
     end
+
 
 
 
