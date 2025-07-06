@@ -24,7 +24,7 @@ module Mutations
 
       download_url = Rails.application.routes.url_helpers.rails_blob_url(
         export.file,
-        host: ENV.fetch("APP_HOST_PROD")
+        host: ENV.fetch("APP_HOST", "https://customersupportticketapi-production.up.railway.app")
       )
 
       {

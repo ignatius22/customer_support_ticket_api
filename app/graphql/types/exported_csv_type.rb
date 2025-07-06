@@ -8,7 +8,7 @@ module Types
 
       Rails.application.routes.url_helpers.rails_blob_url(
         object.file,
-        host: ENV.fetch("APP_HOST_PROD")
+        host: ENV.fetch("APP_HOST", "https://customersupportticketapi-production.up.railway.app")
       )
     end
   end
