@@ -11,14 +11,14 @@ module Types
     field :comments, [ Types::CommentType ], null: false
     field :file_urls, [ String ], null: false
 
-    # def file_urls
-    #   object.files.map { |file| file.blob.url }
-    # end
-
-    def file_urls
-      object.files.map do |file|
-        Rails.application.routes.url_helpers.rails_blob_url(file, only_path: false)
+      def file_urls
+        object.files.map { |file| file.blob.url }
       end
-    end
+
+    # def file_urls
+    #   object.files.map do |file|
+    #     Rails.application.routes.url_helpers.rails_blob_url(file, only_path: false)
+    #   end
+    # end
   end
 end
