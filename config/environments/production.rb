@@ -1,4 +1,3 @@
-# config/environments/production.rb
 require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
@@ -23,6 +22,17 @@ Rails.application.configure do
   config.assume_ssl = true
   config.force_ssl = true
 
+  # --- START: ENVIRONMENT VARIABLE CONFIGURATION FOR HOST & PROTOCOL ---
+  # These variables MUST be set in your Railway project's service environment variables.
+  # Example for APP_HOST_PROD: your-app-name.up.railway.app OR api.yourdomain.com
+  # Example for APP_PROTOCOL_PROD: https
+  production_host = ENV.fetch("APP_HOST_PROD") do
+    raise "APP_HOST_PROD environment variable is not set for production! Please configure it on Railway."
+  end
+  production_protocol = ENV.fetch("APP_PROTOCOL_PROD", "https") # Defaults to https if not explicitly set
+
+  # --- END: ENVIRONMENT VARIABLE CONFIGURATION ---
+
   # Logging
   config.log_tags  = [ :request_id ]
   config.logger    = ActiveSupport::TaggedLogging.logger(STDOUT)
@@ -39,7 +49,7 @@ Rails.application.configure do
   # Email delivery setup
   config.action_mailer.raise_delivery_errors = true
   config.action_mailer.delivery_method = :smtp
-  config.action_mailer.default_url_options = { host: ENV.fetch("APP_HOST_PROD"), protocol: "https" }
+  config.action_mailer.default_url_options = { host: production_host, protocol: production_protocol }
 
   config.action_mailer.smtp_settings = {
     user_name: Rails.application.credentials.dig(:smtp, :user_name),
@@ -49,6 +59,14 @@ Rails.application.configure do
     authentication: :plain,
     enable_starttls_auto: true
   }
+
+  # --- START: CRITICAL URL OPTIONS FOR ACTIVE STORAGE AND ROUTES ---
+  # These lines are absolutely ESSENTIAL for Active Storage to generate
+  # correct, full URLs for your attachments (e.g., in TicketType#file_urls).
+  # They provide the necessary host and protocol context to the Rails URL helpers.
+  config.action_controller.default_url_options = { host: production_host, protocol: production_protocol }
+  Rails.application.routes.default_url_options = { host: production_host, protocol: production_protocol }
+  # --- END: CRITICAL URL OPTIONS ---
 
   # I18n fallbacks
   config.i18n.fallbacks = true
