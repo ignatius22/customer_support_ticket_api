@@ -13,7 +13,7 @@ module Types
 
 
     def file_urls
-      object.files.map { |file| Rails.application.routes.url_helpers.rails_blob_url(file, only_path: true) }
+      object.files.map { |file| file.blob.url }
     end
   end
 end
