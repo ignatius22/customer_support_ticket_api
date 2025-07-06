@@ -40,11 +40,14 @@ module Types
     def all_tickets(page:, per_page:, status: nil)
       user = context[:current_user]
       raise GraphQL::ExecutionError, "Unauthorized" unless user&.agent?
-
+    
       scope = Ticket.order(created_at: :desc)
-      scope = scope.where(status: status) if status.present?
+    
+      # ↓ Normalize GraphQL enum (e.g. "OPEN") to model enum (e.g. "open")
+      scope = scope.where(status: status.downcase) if status.present?
+    
       tickets = scope.page(page).per(per_page)
-
+    
       {
         tickets: tickets,
         current_page: tickets.current_page,
@@ -52,7 +55,7 @@ module Types
         total_count: tickets.total_count
       }
     end
-
+    
     # Fetch single ticket (restricted)
     field :ticket, Types::TicketType, null: true do
       argument :id, ID, required: true
