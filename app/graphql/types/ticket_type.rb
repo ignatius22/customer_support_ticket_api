@@ -12,9 +12,7 @@ module Types
     field :file_urls, [ String ], null: false
 
     def file_urls
-      object.files.map do |file|
-        Rails.application.routes.url_helpers.rails_blob_url(file, only_path: false)
-      end
+      object.files.map { |file| file.blob.url }
     end
   end
 end
