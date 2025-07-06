@@ -7,8 +7,8 @@ module Types
 
     field :customer, Types::UserType, null: false
     field :agent, Types::UserType, null: true
-    field :comments, [Types::CommentType], null: false
-    field :file_urls, [String], null: false
+    field :comments, [ Types::CommentType ], null: false
+    field :file_urls, [ String ], null: false
 
     def file_urls
       return [] unless object.files.attached?
@@ -23,4 +23,3 @@ module Types
     end
   end
 end
-
