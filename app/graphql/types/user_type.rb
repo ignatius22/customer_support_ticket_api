@@ -13,7 +13,7 @@ module Types
     def file_urls
       return [] unless object.respond_to?(:files) && object.files.attached?
 
-      host = ENV.fetch("APP_HOST_PROD", "https://your-default-production-url.com")
+      host = ENV.fetch("APP_HOST_PROD", "https://customersupportticketapi-production.up.railway.app")
       protocol = ENV.fetch("APP_PROTOCOL_PROD", "https")
 
       object.files.map do |file|
