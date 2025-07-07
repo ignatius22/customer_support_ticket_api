@@ -427,6 +427,7 @@ DEPENDENCIES
   bootsnap
   brakeman
   cloudinary
+  cronitor (~> 5.2)
   csv (~> 3.3)
   debug
   dotenv-rails (~> 3.1)

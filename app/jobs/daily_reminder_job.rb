@@ -1,24 +1,18 @@
 class DailyReminderJob < ApplicationJob
   queue_as :default
 
+  # Add Cronitor hook (must match monitor slug in Cronitor dashboard)
+  Cronitor.job "daily-reminder-check"
+
   def perform
-    Cronitor.ping("daily-reminder-job-start")
-  
-    tickets_by_agent = Ticket.where(status: :open).where.not(agent_id: nil).limit(1000).group_by(&:agent_id)
-  
-    agents = User.where(id: tickets_by_agent.keys, role: :agent)
-  
+    agent_ids = Ticket.where(status: :open).pluck(:agent_id).uniq.compact
+    agents = User.where(id: agent_ids, role: :agent)
+
     agents.find_each do |agent|
-      ticket_ids = tickets_by_agent[agent.id]&.map(&:id) || []
-      next if ticket_ids.empty?
-  
-      AgentMailer.daily_reminder(agent.id, ticket_ids).deliver_later
+      tickets = Ticket.where(agent_id: agent.id, status: :open).limit(10)
+      if tickets.any?
+        AgentMailer.daily_reminder(agent.id, tickets.map(&:id)).deliver_later
+      end
     end
-  
-    Cronitor.ping("daily-reminder-job-complete")
-  rescue => e
-    Cronitor.ping("daily-reminder-job-failed")
-    raise e
   end
-  
 end
