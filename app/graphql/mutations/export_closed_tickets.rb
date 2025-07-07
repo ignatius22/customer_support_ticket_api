@@ -36,7 +36,8 @@ module Mutations
 
       download_url = Rails.application.routes.url_helpers.rails_blob_url(
         export.file,
-        host: ENV.fetch("APP_HOST", "http://localhost:3000")
+        host: ActiveStorage::Current.url_options[:host],
+        protocol: ActiveStorage::Current.url_options[:protocol]
       )
 
       {
