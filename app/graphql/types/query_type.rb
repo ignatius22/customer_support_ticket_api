@@ -7,7 +7,6 @@ module Types
       context[:current_user]
     end
 
-
     field :my_tickets, Types::PaginatedTicketsType, null: false do
       argument :page, Integer, required: false, default_value: 1
       argument :per_page, Integer, required: false, default_value: 10
@@ -27,15 +26,11 @@ module Types
       }
     end
 
-
     field :all_tickets, Types::PaginatedTicketsType, null: false do
       argument :page, Integer, required: false, default_value: 1
       argument :per_page, Integer, required: false, default_value: 10
       argument :status, Types::TicketStatusEnum, required: false
     end
-
-
-
 
     def all_tickets(page:, per_page:, status: nil)
       user = context[:current_user]
@@ -78,7 +73,6 @@ module Types
     field :comments, [ Types::CommentType ], null: false do
       argument :ticket_id, ID, required: true
     end
-
 
     def comments(ticket_id:)
       user = context[:current_user]
