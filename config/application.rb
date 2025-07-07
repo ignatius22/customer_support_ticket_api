@@ -28,6 +28,9 @@ module CustomerSupportTicketingApi
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
 
+    config.eager_load_paths << Rails.root.join("lib")
+
+
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files
@@ -42,7 +45,7 @@ module CustomerSupportTicketingApi
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
 
-    # 👇 Add this block to enable sessions (needed for Sidekiq::Web UI)
+    # Add this block to enable sessions (needed for Sidekiq::Web UI)
     config.middleware.use ActionDispatch::Cookies
     config.middleware.use ActionDispatch::Session::CookieStore, key: "_customer_support_ticketing_session"
     config.middleware.use ApolloUploadServer::Middleware
