@@ -5,9 +5,6 @@ class AgentMailer < ApplicationMailer
     @agent = User.find(agent_id)
     @tickets = Ticket.where(id: ticket_ids)
 
-    mail(
-      to: @agent.email,
-      subject: "🛎️ Daily Reminder: You have #{@tickets.size} open ticket(s)"
-    )
+    mail(to: @agent.email, subject: "You have #{@tickets.count} open tickets")
   end
 end
