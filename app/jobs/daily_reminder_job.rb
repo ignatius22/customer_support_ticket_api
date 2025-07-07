@@ -1,5 +1,4 @@
 class DailyReminderJob < ApplicationJob
-  include Sidekiq::Job 
 
   def perform
     Cronitor.wrap('MONITOR_KEY') do
