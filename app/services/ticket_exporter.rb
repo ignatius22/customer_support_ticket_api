@@ -1,5 +1,5 @@
 require "csv"
-require "stringio"
+
 
 class TicketExporter
   def initialize(tickets)

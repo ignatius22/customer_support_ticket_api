@@ -14,18 +14,8 @@ module Mutations
       tickets = Ticket.where(status: :closed)
                       .where("updated_at >= ?", 30.days.ago)
 
-      csv_content = CSV.generate(headers: true) do |csv|
-        csv << %w[id title customer status closed_at]
-        tickets.each do |ticket|
-          csv << [
-            ticket.id,
-            ticket.title,
-            ticket.customer&.email,
-            ticket.status,
-            ticket.updated_at.to_date
-          ]
-        end
-      end
+      # Using the service object here
+      csv_content = TicketExporter.new(tickets).to_csv
 
       export = ExportedCsv.create!(user: agent)
       export.file.attach(
@@ -34,7 +24,7 @@ module Mutations
         content_type: "text/csv"
       )
 
-      # Fallback if ActiveStorage::Current.url_options is nil
+      # Ensuring production URL options are used
       url_options = ActiveStorage::Current.url_options || {
         host: ENV.fetch("APP_HOST_PROD", "customersupportticketapi-production.up.railway.app"),
         protocol: ENV.fetch("APP_PROTOCOL_PROD", "https")
