@@ -35,7 +35,7 @@ gem "thruster", require: false
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin Ajax possible
 gem "rack-cors"
 
-gem "graphql", "~> 2.1"
+gem "graphql", "~> 2.5"
 
 group :test do
   gem "shoulda-matchers"
