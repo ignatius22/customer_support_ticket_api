@@ -143,7 +143,7 @@ GEM
       activesupport (>= 6.1)
     graphiql-rails (1.10.5)
       railties
-    graphql (2.5.9)
+    graphql (2.5.11)
       base64
       fiber-storage
       logger
@@ -432,7 +432,7 @@ DEPENDENCIES
   dotenv-rails (~> 3.1)
   factory_bot_rails
   graphiql-rails (~> 1.8)
-  graphql (~> 2.1)
+  graphql (~> 2.5)
   jwt (~> 3.1)
   kamal
   kaminari
