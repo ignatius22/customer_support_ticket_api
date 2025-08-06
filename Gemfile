@@ -57,7 +57,7 @@ group :development, :test do
 
   gem "rubocop-rails", "~> 2.32"
 
-  gem "rubocop", "~> 1.77"
+  gem "rubocop", "~> 1.79"
 
   gem "dotenv-rails", "~> 3.1"
 end
